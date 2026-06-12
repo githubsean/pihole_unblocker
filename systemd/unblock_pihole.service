@@ -1,0 +1,24 @@
+[Unit]
+Description=Pi-hole Control Panel
+After=network.target pihole.service
+StartLimitBurst=5
+StartLimitIntervalSec=60s
+
+[Service]
+Type=simple
+User=pihole
+Group=pihole
+WorkingDirectory=/opt/unblock_pihole
+EnvironmentFile=/opt/unblock_pihole/.env
+ExecStart=/usr/bin/python3 /opt/unblock_pihole/pihole_proxy.py
+Restart=on-failure
+RestartSec=10
+# This ensures signals are passed through to Python properly
+KillMode=mixed
+KillSignal=SIGTERM
+
+TimeoutStopSec=15s
+
+[Install]
+WantedBy=multi-user.target
+

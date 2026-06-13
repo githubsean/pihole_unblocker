@@ -29,6 +29,10 @@ class TemplateLoader:
         # Return the path to the CSS file.
         return self.base_dir / "styles.css"
 
+    def favicon_path(self) -> Path:
+        # Return the path to the favicon SVG file.
+        return self.base_dir / "favicon.svg"
+
 
 # Module-level singleton
 html_loader = TemplateLoader()

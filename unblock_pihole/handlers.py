@@ -37,6 +37,8 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
             self._handle_status()
         elif self.path == "/static/styles.css":
             self._serve_static_css()
+        elif self.path == "/static/favicon.svg":
+            self._serve_static_favicon()
         else:
             logger.warning(f"Not found: {self.path}")
             self._send_error_json(404, {"error": "Not found"})
@@ -67,12 +69,28 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header("Content-Type", "text/css; charset=utf-8")
-            self.send_header("Cache-Control", "public, max-age=3600")
+            self.send_header("CacheControl", "public, max-age=3600")
             self.end_headers()
             self.wfile.write(css_content.encode("utf-8"))
         except FileNotFoundError:
             logger.error("CSS file not found")
             self._send_error_json(500, {"error": "Static file not found"})
+
+    def _serve_static_favicon(self):
+        # Serve the favicon SVG file.
+        try:
+            favicon_path = html_loader.favicon_path()
+            with open(favicon_path, "r", encoding="utf-8") as f:
+                favicon_content = f.read()
+
+            self.send_response(200)
+            self.send_header("Content-Type", "image/svg+xml")
+            self.send_header("CacheControl", "public, max-age=3600")
+            self.end_headers()
+            self.wfile.write(favicon_content.encode("utf-8"))
+        except FileNotFoundError:
+            logger.error("Favicon file not found")
+            self._send_error_json(500, {"error": "Favicon not found"})
 
     # ------------------------------------------------------------------
     # Main page

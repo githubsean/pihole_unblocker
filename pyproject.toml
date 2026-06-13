@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pihole-proxy"
+name = "unblock_pihole"
 version = "1.0.0"
 description = "A web interface to remotely enable/disable Pi-hole's DNS blocking feature"
 requires-python = ">=3.9"
@@ -11,10 +11,10 @@ license = {text = "MIT"}
 authors = [{name = "Sean Anderson"}]
 
 [project.scripts]
-pihole-proxy = "pihole_proxy.server:main"
+unblock_pihole = "unblock_pihole.server:main"
 
 [tool.setuptools.packages.find]
-include = ["pihole_proxy*"]
+include = ["unblock_pihole*"]
 
 [tool.setuptools.package-data]
-pihole_proxy = ["templates/*.html"]
+unblock_pihole = ["templates/*.html"]

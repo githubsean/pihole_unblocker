@@ -9,9 +9,9 @@ pihole_unblocker/
 ├── .gitignore
 ├── README.md
 ├── pyproject.toml              # Package configuration and dependencies
-├── pihole_proxy/               # Main Python package
+├── unblock_pihole/               # Main Python package
 │   ├── __init__.py             # Package initialization and exports
-│   ├── __main__.py             # Entry point for `python -m pihole_proxy`
+│   ├── __main__.py             # Entry point for `python -m unblock_pihole`
 │   ├── config.py               # Configuration management (env vars)
 │   ├── models.py               # Data models (Pydantic-style dataclasses)
 │   ├── session.py              # Pi-hole API session management
@@ -41,6 +41,7 @@ Centralized configuration loaded from environment variables using a frozen datac
 | `SESSION_TIMEOUT` | `60` | Session inactivity timeout in seconds |
 | `PIHOLE_TIMEOUT` | `5` | Pi-hole API request timeout in seconds |
 | `API_SECRET` | *(auto-generated)* | Backend secret for frontend validation |
+
 
 ### `models.py` — Data Models
 Type-safe dataclasses for request/response handling:
@@ -174,26 +175,26 @@ export PIHOLE_URL="https://pihole.sean-anderson.com"
 export PIHOLE_PASSWORD="your_password"
 
 # Run using the package module entry point
-python -m pihole_proxy
+python -m unblock_pihole
 
 # Or use the installed command-line entry point (after pip install)
-pihole-proxy
+unblock_pihole
 ```
 
 ### With custom port
 
 ```bash
-SERVER_PORT=8080 python -m pihole_proxy
+SERVER_PORT=8080 python -m unblock_pihole
 ```
 
 ### How the module path works
 
-When running `python -m pihole_proxy`, Python searches for the `pihole_proxy` package in:
+When running `python -m unblock_pihole`, Python searches for the `unblock_pihole` package in:
 1. The current working directory
 2. Directories listed in `sys.path` (includes the directory of the script being run)
 3. Python's site-packages (where `pip install` places packages)
 
-For the systemd service, the `ExecStart` uses the full path to the virtual environment's Python interpreter (`/opt/unblock_pihole/.venv/bin/python`), and since the package is installed in that virtual environment, Python can find `pihole_proxy` automatically.
+For the systemd service, the `ExecStart` uses the full path to the virtual environment's Python interpreter (`/opt/unblock_pihole/.venv/bin/python`), and since the package is installed in that virtual environment, Python can find `unblock_pihole` automatically.
 
 ## API Endpoints
 

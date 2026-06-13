@@ -13,7 +13,7 @@ import urllib.request
 import ssl
 from urllib.error import URLError, HTTPError
 
-from pihole_proxy.config import config
+from unblock_pihole.config import config
 
 logger = logging.getLogger(__name__)
 

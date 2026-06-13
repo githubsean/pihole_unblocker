@@ -10,7 +10,7 @@ User=pihole
 Group=pihole
 WorkingDirectory=/opt/unblock_pihole
 EnvironmentFile=/opt/unblock_pihole/.env
-ExecStart=/opt/unblock_pihole/.venv/bin/python -m pihole_proxy
+ExecStart=/opt/unblock_pihole/.venv/bin/python -m unblock_pihole
 Restart=on-failure
 RestartSec=10
 # This ensures signals are passed through to Python properly

@@ -8,7 +8,7 @@ import logging
 import signal
 import threading
 
-from pihole_proxy.config import config
+from unblock_pihole.config import config
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def setup_logging():
 
 def create_session_manager():
     # Create and return the Pi-hole session manager.
-    from pihole_proxy.session import PiHoleSession, SessionCleanupThread
+    from unblock_pihole.session import PiHoleSession, SessionCleanupThread
 
     session_mgr = PiHoleSession()
     cleanup_thread = SessionCleanupThread(session_mgr, check_interval=10)
@@ -37,7 +37,7 @@ def create_server(port, session_mgr):
     # Create and configure the HTTP server with the proxy handler.
     import http.server
 
-    from pihole_proxy.handlers import PiHoleProxyHandler
+    from unblock_pihole.handlers import PiHoleProxyHandler
 
     # Inject session manager into the handler class
     PiHoleProxyHandler.session_mgr = session_mgr

@@ -12,10 +12,10 @@ import ssl
 from http.server import BaseHTTPRequestHandler
 from urllib.error import HTTPError
 
-from pihole_proxy.config import config
-from pihole_proxy.models import ApiResponse, DisableRequest, StatusResponse
-from pihole_proxy.session import PiHoleSession
-from pihole_proxy.templates import html_loader
+from unblock_pihole.config import config
+from unblock_pihole.models import ApiResponse, DisableRequest, StatusResponse
+from unblock_pihole.session import PiHoleSession
+from unblock_pihole.templates import html_loader
 
 logger = logging.getLogger(__name__)
 

@@ -81,6 +81,40 @@ Type-safe dataclasses for request/response handling:
 
 ## Installation
 
+### Option 1: Install to /opt (Recommended for systemd service)
+
+This is the recommended approach for production deployments using systemd:
+
+```bash
+# Create the installation directory
+sudo mkdir -p /opt/unblock_pihole
+sudo chown $USER:$USER /opt/unblock_pihole
+
+# Clone the repository
+cd /opt/unblock_pihole
+git clone <repository-url> .
+
+# Create and activate a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install the package in editable mode
+pip install -e .
+```
+
+### Option 2: Install system-wide
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd pihole_unblocker
+
+# Install system-wide (may require sudo)
+pip install .
+```
+
+### Option 3: Development install
+
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -90,64 +124,76 @@ cd pihole_unblocker
 python3 -m venv .venv
 source .venv/bin/activate
 
-# Install the package
+# Install in editable/development mode
 pip install -e .
+```
+
+## Configuration
+
+Create a `.env` file with the required configuration. The file should be placed at the path referenced by your deployment method:
+
+```bash
+PIHOLE_URL=https://pihole.sean-anderson.com
+PIHOLE_PASSWORD=your_password
+SERVER_PORT=12345
+SESSION_TIMEOUT=60
+PIHOLE_TIMEOUT=5
 ```
 
 ## Usage
 
-### Command Line
+### Running via systemd (recommended for production)
+
+1. Install the package to `/opt/unblock_pihole` (see Installation above)
+
+2. Create the `.env` file at `/opt/unblock_pihole/.env`:
+   ```bash
+   PIHOLE_URL=https://pihole.sean-anderson.com
+   PIHOLE_PASSWORD=your_password
+   SERVER_PORT=12345
+   ```
+
+3. Copy the service file and enable it:
+   ```bash
+   sudo cp systemd/unblock_pihole.service /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable unblock_pihole
+   sudo systemctl start unblock_pihole
+   ```
+
+4. Check status:
+   ```bash
+   sudo systemctl status unblock_pihole
+   ```
+
+### Running from command line
 
 ```bash
 # Set required environment variables
 export PIHOLE_URL="https://pihole.sean-anderson.com"
 export PIHOLE_PASSWORD="your_password"
 
-# Run the server
+# Run using the package module entry point
 python -m pihole_proxy
 
-# Or use the entry point (after installation)
+# Or use the installed command-line entry point (after pip install)
 pihole-proxy
 ```
 
-### With Custom Port
+### With custom port
 
 ```bash
 SERVER_PORT=8080 python -m pihole_proxy
 ```
 
-### Docker
+### How the module path works
 
-```bash
-docker build -t pihole-unblocker .
-docker run -e PIHOLE_URL="https://pihole.example.com" \
-           -e PIHOLE_PASSWORD="your_password" \
-           -p 12345:12345 \
-           pihole-unblocker
-```
+When running `python -m pihole_proxy`, Python searches for the `pihole_proxy` package in:
+1. The current working directory
+2. Directories listed in `sys.path` (includes the directory of the script being run)
+3. Python's site-packages (where `pip install` places packages)
 
-## Systemd Service
-
-The project includes a systemd service file for running as a background service:
-
-1. Copy the service file:
-   ```bash
-   sudo cp systemd/unblock_pihole.service /etc/systemd/system/
-   ```
-
-2. Create a `.env` file at `/opt/unblock_pihole/.env`:
-   ```
-   PIHOLE_URL=https://pihole.sean-anderson.com
-   PIHOLE_PASSWORD=your_password
-   SERVER_PORT=12345
-   ```
-
-3. Enable and start the service:
-   ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl enable unblock_pihole
-   sudo systemctl start unblock_pihole
-   ```
+For the systemd service, the `ExecStart` uses the full path to the virtual environment's Python interpreter (`/opt/unblock_pihole/.venv/bin/python`), and since the package is installed in that virtual environment, Python can find `pihole_proxy` automatically.
 
 ## API Endpoints
 

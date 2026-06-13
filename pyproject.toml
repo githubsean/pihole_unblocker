@@ -11,7 +11,7 @@ license = {text = "MIT"}
 authors = [{name = "Sean Anderson"}]
 
 [project.scripts]
-pihole-proxy = "pihole_proxy:main"
+pihole-proxy = "pihole_proxy.server:main"
 
 [tool.setuptools.packages.find]
 include = ["pihole_proxy*"]

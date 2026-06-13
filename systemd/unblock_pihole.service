@@ -10,7 +10,7 @@ User=pihole
 Group=pihole
 WorkingDirectory=/opt/unblock_pihole
 EnvironmentFile=/opt/unblock_pihole/.env
-ExecStart=/usr/bin/python3 -m pihole_proxy
+ExecStart=/opt/unblock_pihole/.venv/bin/python -m pihole_proxy
 Restart=on-failure
 RestartSec=10
 # This ensures signals are passed through to Python properly
@@ -21,4 +21,3 @@ TimeoutStopSec=15s
 
 [Install]
 WantedBy=multi-user.target
-

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disable PiHole</title>
+    
+    <!-- 32x32 Green Shield Favicon -->
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZD0iTTE2IDJMNCA4djEwYzAgNyA1IDEyIDEyIDE0IDctMiAxMi03IDEyLTE0VjhMMTYgMnoiIGZpbGw9IiMyZWNjNDEiLz48L3N2Zz4=">
+    
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Disable PiHole</h1>
+        
+        <div id="statusIndicator" class="status-indicator enabled">
+            <span class="status-dot"></span>
+            <span id="statusText">Blocking is ENABLED</span>
+        </div>
+
+
+
+        <form id="disableForm">
+            <div class="form-group">
+                <label for="minutesSlider">Minutes</label>
+                <div class="slider-container">
+                    <input type="range" id="minutesSlider" name="minutes" min="0" max="60" value="5" step="1">
+                    <div class="slider-value" id="sliderDisplay">5 minutes</div>
+                </div>
+            </div>
+            
+            <button type="submit" id="disableBtn" class="btn-disable">Disable Pihole</button>
+            <button type="button" id="enableBtn" class="btn-enable">Enable Pihole</button>
+        </form>
+        
+        <div id="responseMessage" class="message"></div>
+    </div>
+
+    <script>
+        const BACKEND_SECRET = "__API_SECRET_PLACEHOLDER__";
+        const slider = document.getElementById("minutesSlider");
+        const display = document.getElementById("sliderDisplay");
+        
+        slider.addEventListener("input", function() {
+            const val = parseInt(this.value);
+            display.textContent = `${val} minute${val === 1 ? '' : 's'}`;
+        });
+        
+        let pollInterval;
+        function updateStatus() {
+            fetch("/api/status")
+                .then(response => response.json())
+                .then(data => {
+                    const statusDiv = document.getElementById("statusIndicator");
+                    const statusText = document.getElementById("statusText");
+                    
+                    if (data.status === "enabled") {
+                        statusDiv.className = "status-indicator enabled";
+                        statusText.textContent = "Blocking is ENABLED";
+                    } else if (data.status === "disabled") {
+                        statusDiv.className = "status-indicator disabled";
+                        
+                        const timerSeconds = data.timer || 0;
+                        if (timerSeconds < 60) {
+                            statusText.textContent = `Blocking is DISABLED (${Math.ceil(timerSeconds)}s remaining)`;
+                        } else {
+                            const minutesRemaining = Math.ceil(timerSeconds / 60);
+                            statusText.textContent = `Blocking is DISABLED (${minutesRemaining}m remaining)`;
+                        }
+                    } else {
+                        statusDiv.className = "status-indicator disabled";
+                        statusText.textContent = "Status unknown - check server logs";
+                    }
+                })
+                .catch(error => {
+                    console.log("Status poll failed:", error);
+                });
+        }
+        
+        updateStatus();
+        pollInterval = setInterval(updateStatus, 10000);
+
+
+
+        document.getElementById("disableForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById("disableBtn");
+            const messageDiv = document.getElementById("responseMessage");
+            const minutes = parseInt(slider.value);
+            
+            if (isNaN(minutes) || minutes < 0 || minutes > 60) {
+                showMessage("Please enter a value between 0 and 60 minutes.", "error");
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = "Disabling...";
+            messageDiv.style.display = "none";
+            
+            try {
+                const response = await fetch("/api/disable", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-Backend-Secret": BACKEND_SECRET },
+                    body: JSON.stringify({ timer: minutes })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === "success") {
+                    showMessage(data.message, "success");
+                    updateStatus();
+                } else {
+                    showMessage(data.error || "An unexpected error occurred.", "error");
+                }
+            } catch (error) {
+                showMessage("Network error: Could not connect to the backend service. Please check your connection and try again.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Disable Pihole";
+            }
+        });
+
+
+
+        document.getElementById("enableBtn").addEventListener("click", async function() {
+            const btn = this;
+            const messageDiv = document.getElementById("responseMessage");
+            
+            btn.disabled = true;
+            btn.textContent = "Enabling...";
+            messageDiv.style.display = "none";
+            
+            try {
+                const response = await fetch("/api/enable", {
+                    method: "POST",
+                    headers: { "X-Backend-Secret": BACKEND_SECRET }                    
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === "success") {
+                    showMessage(data.message, "success");
+                    updateStatus();
+                } else {
+                    showMessage(data.error || "An unexpected error occurred.", "error");
+                }
+            } catch (error) {
+                showMessage("Network error: Could not connect to the backend service. Please check your connection and try again.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Enable Pihole";
+            }
+        });
+        
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById("responseMessage");
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = "block";
+            
+            if (type === "success") {
+                setTimeout(() => {
+                    messageDiv.style.display = "none";
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

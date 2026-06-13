@@ -1,6 +1,6 @@
-"""
-Pi-hole Proxy - A web interface to remotely enable/disable Pi-hole's DNS blocking feature.
-"""
+#
+# Pi-hole Proxy - A web interface to remotely enable/disable Pi-hole's DNS blocking feature.
+#
 
 from pihole_proxy.config import config
 from pihole_proxy.server import main

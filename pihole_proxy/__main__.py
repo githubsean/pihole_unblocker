@@ -1,6 +1,6 @@
-"""
-Allow running the package as a module: python -m pihole_proxy
-"""
+#
+# Allow running the package as a module: python -m pihole_proxy
+#
 
 from pihole_proxy.server import main
 

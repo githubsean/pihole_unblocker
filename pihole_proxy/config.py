@@ -1,8 +1,8 @@
-"""
-Configuration management for Pi-hole Proxy.
-
-Loads settings from environment variables with sensible defaults.
-"""
+#
+# Configuration management for Pi-hole Proxy.
+#
+# Loads settings from environment variables with sensible defaults.
+#
 
 import os
 import secrets
@@ -13,7 +13,7 @@ from typing import Optional
 
 @dataclass(frozen=True)
 class Config:
-    """Immutable configuration for the Pi-hole Proxy server."""
+    # Immutable configuration for the Pi-hole Proxy server.
 
     # Pi-hole API URL
     pihole_url: str
@@ -32,7 +32,7 @@ class Config:
 
 
 def _get_env(key: str, default: str = "", *, required: bool = False) -> str:
-    """Get an environment variable with optional required check."""
+    # Get an environment variable with optional required check.
     value = os.getenv(key, default)
     if required and not value:
         raise ValueError(f"Required environment variable '{key}' is not set")
@@ -40,7 +40,7 @@ def _get_env(key: str, default: str = "", *, required: bool = False) -> str:
 
 
 def create_config() -> Config:
-    """Create and return the application configuration."""
+    # Create and return the application configuration.
     pihole_url = _get_env("PIHOLE_URL", required=True)
     pihole_password = _get_env("PIHOLE_PASSWORD", required=False)
     server_port = int(_get_env("SERVER_PORT", "12345"))

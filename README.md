@@ -209,3 +209,8 @@ All API endpoints require the `X-Backend-Secret` header with the value generated
 ## License
 
 MIT
+
+## AI Statement
+This project was developed with the assistance of AI.
+I mostly used Qwen 3.6 integrated with VS Code and Cline.
+I also used Claude.ai for other general advice

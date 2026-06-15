@@ -17,4 +17,4 @@ unblock_pihole = "unblock_pihole.server:main"
 include = ["unblock_pihole*"]
 
 [tool.setuptools.package-data]
-unblock_pihole = ["templates/*.html"]
+unblock_pihole = ["templates/*"]

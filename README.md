@@ -1,5 +1,7 @@
 # Pi-hole Unblocker
 
+![Pi-hole Unblocker Application](assets/screenshot.png "Pi-hole Unblocker Interface")
+
 A Python-based proxy server that provides a web interface to remotely enable/disable Pi-hole's DNS blocking feature for a configurable duration.
 
 ## Project Structure
@@ -94,7 +96,8 @@ sudo useradd --system --no-create-home --shell /usr/sbin/nologin --comment "Unbl
 sudo mkdir -p /opt/unblock_pihole
 sudo chown unblock-pihole:unblock-pihole /opt/unblock_pihole
 
-# Clone the repository. You may have to sudo this and then change the owner of all the files/directories to the unblock-pihole user
+# Clone the repository. First switch to the new user
+sudo -u unblock-pihole /usr/bin/bash
 cd /opt/unblock_pihole
 git clone <repository-url> .
 
@@ -102,7 +105,7 @@ git clone <repository-url> .
 python3 -m venv .venv
 source .venv/bin/activate
 
-# Install the package in editable mode
+# Install the package in editable mode - ignore the cache warning if you get it (no home dir)
 pip install -e .
 ```
 
@@ -134,7 +137,7 @@ pip install -e .
 
 ## Configuration
 
-Create a `.env` file with the required configuration. The file should be placed at the path referenced by your deployment method:
+Create a `.env` file with the required configuration. The file should be placed at the path referenced by your deployment method. For example, for a systemd install, create it in /opt/unblock_pihole:
 
 ```bash
 PIHOLE_URL=https://pihole.example.com
@@ -142,6 +145,19 @@ PIHOLE_PASSWORD=your_password
 SERVER_PORT=12345
 SESSION_TIMEOUT=60
 PIHOLE_TIMEOUT=5
+```
+
+## Updating
+
+If you have installed this as a systemd service, into `/opt/unblock_pihole` and you have it running as its own `unblock-pihole` user, run the following script to update everything. This can be run as any user with `sudo` privileges.
+
+```bash
+#!/bin/bash
+set -e
+
+sudo -u unblock-pihole git -C /opt/unblock_pihole pull
+sudo -u unblock-pihole /opt/unblock_pihole/.venv/bin/pip install --no-cache-dir -e /opt/unblock_pihole
+sudo systemctl restart unblock_pihole
 ```
 
 ## Usage
@@ -155,6 +171,8 @@ PIHOLE_TIMEOUT=5
    PIHOLE_URL=https://pihole.example.com
    PIHOLE_PASSWORD=your_password
    SERVER_PORT=12345
+   SESSION_TIMEOUT=60
+   PIHOLE_TIMEOUT=5
    ```
 
 3. Copy the service file and enable it:

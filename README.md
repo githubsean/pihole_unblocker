@@ -141,15 +141,6 @@ unblock_pihole
 SERVER_PORT=8080 python -m unblock_pihole
 ```
 
-### How the module path works
-
-When running `python -m unblock_pihole`, Python searches for the `unblock_pihole` package in:
-1. The current working directory
-2. Directories listed in `sys.path` (includes the directory of the script being run)
-3. Python's site-packages (where `pip install` places packages)
-
-For the systemd service, the `ExecStart` uses the full path to the virtual environment's Python interpreter (`/opt/unblock_pihole/.venv/bin/python`), and since the package is installed in that virtual environment, Python can find `unblock_pihole` automatically.
-
 ## API Endpoints
 
 | Method | Endpoint | Description |

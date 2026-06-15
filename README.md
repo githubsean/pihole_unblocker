@@ -87,11 +87,14 @@ Type-safe dataclasses for request/response handling:
 This is the recommended approach for production deployments using systemd:
 
 ```bash
+# Create a new user for the service
+sudo useradd --system --no-create-home --shell /usr/sbin/nologin --comment "Unblock PiHole service" unblock-pihole
+
 # Create the installation directory
 sudo mkdir -p /opt/unblock_pihole
-sudo chown $USER:$USER /opt/unblock_pihole
+sudo chown unblock-pihole:unblock-pihole /opt/unblock_pihole
 
-# Clone the repository
+# Clone the repository. You may have to sudo this and then change the owner of all the files/directories to the unblock-pihole user
 cd /opt/unblock_pihole
 git clone <repository-url> .
 
@@ -134,7 +137,7 @@ pip install -e .
 Create a `.env` file with the required configuration. The file should be placed at the path referenced by your deployment method:
 
 ```bash
-PIHOLE_URL=https://pihole.sean-anderson.com
+PIHOLE_URL=https://pihole.example.com
 PIHOLE_PASSWORD=your_password
 SERVER_PORT=12345
 SESSION_TIMEOUT=60
@@ -149,7 +152,7 @@ PIHOLE_TIMEOUT=5
 
 2. Create the `.env` file at `/opt/unblock_pihole/.env`:
    ```bash
-   PIHOLE_URL=https://pihole.sean-anderson.com
+   PIHOLE_URL=https://pihole.example.com
    PIHOLE_PASSWORD=your_password
    SERVER_PORT=12345
    ```
@@ -171,7 +174,7 @@ PIHOLE_TIMEOUT=5
 
 ```bash
 # Set required environment variables
-export PIHOLE_URL="https://pihole.sean-anderson.com"
+export PIHOLE_URL="https://pihole.example.com"
 export PIHOLE_PASSWORD="your_password"
 
 # Run using the package module entry point

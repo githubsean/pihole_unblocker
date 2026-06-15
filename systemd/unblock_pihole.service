@@ -1,23 +1,32 @@
 [Unit]
 Description=Pi-hole Control Panel
 After=network.target pihole.service
-StartLimitBurst=5
-StartLimitIntervalSec=60s
 
 [Service]
 Type=simple
-User=pihole
-Group=pihole
+User=unblock-pihole
+Group=unblock-pihole
 WorkingDirectory=/opt/unblock_pihole
 EnvironmentFile=/opt/unblock_pihole/.env
 ExecStart=/opt/unblock_pihole/.venv/bin/python -m unblock_pihole
+
+# Restart on failure
 Restart=on-failure
 RestartSec=10
+
 # This ensures signals are passed through to Python properly
 KillMode=mixed
 KillSignal=SIGTERM
 
 TimeoutStopSec=15s
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ReadWritePaths=/opt/unblock_pihole
 
 [Install]
 WantedBy=multi-user.target

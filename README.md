@@ -2,76 +2,7 @@
 
 ![Pi-hole Unblocker Application](assets/screenshot.png "Pi-hole Unblocker Interface")
 
-A Python-based proxy server that provides a web interface to remotely enable/disable Pi-hole's DNS blocking feature for a configurable duration.
-
-## Project Structure
-
-```
-pihole_unblocker/
-├── .gitignore
-├── README.md
-├── pyproject.toml              # Package configuration and dependencies
-├── unblock_pihole/               # Main Python package
-│   ├── __init__.py             # Package initialization and exports
-│   ├── __main__.py             # Entry point for `python -m unblock_pihole`
-│   ├── config.py               # Configuration management (env vars)
-│   ├── models.py               # Data models (Pydantic-style dataclasses)
-│   ├── session.py              # Pi-hole API session management
-│   ├── handlers.py             # HTTP request handlers
-│   ├── server.py               # Server startup and signal handling
-│   └── templates/
-│       ├── __init__.py         # Template loader utilities
-│       ├── index.html          # Main control panel HTML
-│       └── styles.css          # Stylesheet
-├── docs/                       # Documentation
-├── scripts/                    # Utility scripts
-├── systemd/
-│   └── unblock_pihole.service  # systemd service unit file
-└── tests/                      # Unit and integration tests
-```
-
-## Module Breakdown
-
-### `config.py` — Configuration Management
-Centralized configuration loaded from environment variables using a frozen dataclass:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PIHOLE_URL` | *(required)* | Pi-hole API URL (e.g., `https://pihole.example.com`) |
-| `PIHOLE_PASSWORD` | *(required)* | Pi-hole API password |
-| `SERVER_PORT` | `12345` | HTTP server listening port |
-| `SESSION_TIMEOUT` | `60` | Session inactivity timeout in seconds |
-| `PIHOLE_TIMEOUT` | `5` | Pi-hole API request timeout in seconds |
-| `API_SECRET` | *(auto-generated)* | Backend secret for frontend validation |
-
-
-### `models.py` — Data Models
-Type-safe dataclasses for request/response handling:
-- **`StatusResponse`** — Blocking status API response
-- **`ApiResponse`** — Generic success/error response wrapper
-- **`DisableRequest`** — Parsed and validated disable request body
-
-### `session.py` — Session Management
-- **`PiHoleSession`** — Thread-safe Pi-hole API authentication with automatic re-authentication on expired sessions
-- **`SessionCleanupThread`** — Background daemon that monitors session inactivity and logs out after the configured timeout
-
-### `handlers.py` — HTTP Request Handling
-- **`PiHoleProxyHandler`** — Handles all HTTP routes:
-  - `GET /` — Serves the HTML control panel
-  - `GET /static/styles.css` — Serves the CSS stylesheet
-  - `GET /api/status` — Returns current blocking status and timer
-  - `POST /api/disable` — Disables blocking for a specified duration (0–60 min)
-  - `POST /api/enable` — Re-enables blocking immediately
-
-### `server.py` — Server Lifecycle
-- `setup_logging()` — Configures structured logging
-- `create_session_manager()` — Initializes session and cleanup thread
-- `create_server()` — Creates the `ThreadingHTTPServer` with configured handler
-- `main()` — Entry point with signal handling and graceful shutdown
-
-### `templates/` — Frontend Assets
-- **`index.html`** — Self-contained control panel with embedded JavaScript (slider for duration, real-time status polling)
-- **`styles.css`** — Responsive styling with animated status indicators
+A small python app that provides a web interface to remotely enable/disable Pi-hole's DNS blocking feature for a configurable duration. This can be published on your LAN to provide to end-users as an easy method to temporarily disable ad-blocking. To make it simple, there is no user login for the end user.
 
 ## Key Features
 
@@ -146,6 +77,8 @@ SERVER_PORT=12345
 SESSION_TIMEOUT=60
 PIHOLE_TIMEOUT=5
 ```
+
+You will need to obtain an API password from your pihole using the "Configure app password" option under `Settings -> Web interface / API`.
 
 ## Updating
 

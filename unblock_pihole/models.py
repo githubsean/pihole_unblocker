@@ -1,6 +1,6 @@
-#
-# Data models for Pi-hole Proxy responses.
-#
+"""
+Data models for Pi-hole Proxy responses.
+"""
 
 from dataclasses import dataclass, field
 from typing import Optional
@@ -8,15 +8,21 @@ from typing import Optional
 
 @dataclass
 class StatusResponse:
-    # Response data for the blocking status API endpoint.
+    """Response data for the blocking status API endpoint.
 
-    status: str  # "enabled", "disabled", or "unknown"
+    Attributes:
+        status: "enabled", "disabled", or "unknown".
+        timer: Timer remaining in seconds.
+        is_blocked: Whether the device is currently blocked.
+        error: Error message if status could not be determined.
+    """
+    status: str
     timer: int = 0
     is_blocked: bool = False
     error: Optional[str] = None
 
     def to_dict(self) -> dict:
-        # Serialize to dictionary for JSON response.
+        """Serialize to dictionary for JSON response."""
         result = {
             "status": self.status,
             "timer": self.timer,
@@ -29,14 +35,19 @@ class StatusResponse:
 
 @dataclass
 class ApiResponse:
-    # Generic API response wrapper.
+    """Generic API response wrapper.
 
-    status: str  # "success" or "error"
+    Attributes:
+        status: "success" or "error".
+        message: Optional success message.
+        error: Optional error message.
+    """
+    status: str
     message: Optional[str] = None
     error: Optional[str] = None
 
     def to_dict(self) -> dict:
-        # Serialize to dictionary for JSON response.
+        """Serialize to dictionary for JSON response."""
         result = {"status": self.status}
         if self.message:
             result["message"] = self.message
@@ -47,13 +58,26 @@ class ApiResponse:
 
 @dataclass
 class DisableRequest:
-    # Parsed data from a disable request body.
+    """Parsed data from a disable request body.
 
+    Attributes:
+        timer: Duration in minutes (0-60).
+    """
     timer: int = 5
 
     @classmethod
     def from_dict(cls, data: dict) -> "DisableRequest":
-        # Parse and validate from a dictionary.
+        """Parse and validate from a dictionary.
+
+        Args:
+            data: Dictionary containing request parameters.
+
+        Returns:
+            A validated DisableRequest instance.
+
+        Raises:
+            ValueError: If timer is not a number between 0 and 60.
+        """
         minutes = data.get("timer", 5)
         if not isinstance(minutes, int) or minutes < 0 or minutes > 60:
             raise ValueError(

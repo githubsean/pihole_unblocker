@@ -1,6 +1,6 @@
-#
-# Unblock Pi-hole - A web interface to remotely enable/disable Pi-hole's DNS blocking feature.
-#
+"""
+Unblock Pi-hole - A web interface to remotely enable/disable Pi-hole's DNS blocking feature.
+"""
 
 from unblock_pihole.config import config
 from unblock_pihole.server import main

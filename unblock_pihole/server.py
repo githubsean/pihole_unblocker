@@ -1,8 +1,8 @@
-#
-# Server startup and signal handling for Pi-hole Proxy.
-#
-# Initializes the HTTP server, session manager, and cleanup thread.
-#
+"""
+Server startup and signal handling for Pi-hole Proxy.
+
+Initializes the HTTP server, session manager, and cleanup thread.
+"""
 
 import logging
 import signal
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def setup_logging():
-    # Configure logging to stdout with a consistent format.
+    """Configure logging to stdout with a consistent format."""
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
@@ -23,7 +23,11 @@ def setup_logging():
 
 
 def create_session_manager():
-    # Create and return the Pi-hole session manager.
+    """Create and return the Pi-hole session manager.
+
+    Returns:
+        Tuple of (PiHoleSession, SessionCleanupThread).
+    """
     from unblock_pihole.session import PiHoleSession, SessionCleanupThread
 
     session_mgr = PiHoleSession()
@@ -34,7 +38,15 @@ def create_session_manager():
 
 
 def create_server(port, session_mgr):
-    # Create and configure the HTTP server with the proxy handler.
+    """Create and configure the HTTP server with the proxy handler.
+
+    Args:
+        port: The port number to bind the server to.
+        session_mgr: The PiHoleSession instance for the handler.
+
+    Returns:
+        A ThreadingHTTPServer instance.
+    """
     import http.server
 
     from unblock_pihole.handlers import PiHoleProxyHandler
@@ -47,7 +59,14 @@ def create_server(port, session_mgr):
 
 
 def _handle_signal(signum, frame, server, cleanup_thread):
-    # Signal handler that gracefully stops the server and triggers cleanup.
+    """Signal handler that gracefully stops the server and triggers cleanup.
+
+    Args:
+        signum: The signal number.
+        frame: The current stack frame.
+        server: The HTTP server instance.
+        cleanup_thread: The session cleanup thread.
+    """
     from signal import Signals
 
     logger.info(f"Received signal {Signals(signum).name}. Initiating shutdown...")
@@ -59,7 +78,7 @@ def _handle_signal(signum, frame, server, cleanup_thread):
 
 
 def main():
-    # Main entry point for the Pi-hole Proxy server.
+    """Main entry point for the Pi-hole Proxy server."""
     setup_logging()
 
     print(f"Starting Pi-hole Control Panel on port {config.server_port}...")

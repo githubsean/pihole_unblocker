@@ -1,6 +1,6 @@
-#
-# Allow running the package as a module: python -m unblock_pihole
-#
+"""
+Allow running the package as a module: python -m unblock_pihole
+"""
 
 from unblock_pihole.server import main
 

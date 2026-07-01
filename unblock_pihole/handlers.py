@@ -1,8 +1,8 @@
-#
-# HTTP request handlers for Pi-hole Proxy.
-#
-# Handles all HTTP GET and POST request routing, validation, and response generation.
-#
+"""
+HTTP request handlers for Pi-hole Proxy.
+
+Handles all HTTP GET and POST request routing, validation, and response generation.
+"""
 
 import json
 import logging
@@ -24,13 +24,15 @@ SSL_CONTEXT = ssl.create_default_context()
 
 
 class PiHoleProxyHandler(BaseHTTPRequestHandler):
-    # HTTP request handler for Pi-hole control operations.
+    """HTTP request handler for Pi-hole control operations.
 
-    # Class-level reference to the session manager (set by server)
+    Class Attributes:
+        session_mgr: Class-level reference to the session manager (set by server).
+    """
     session_mgr: PiHoleSession = None
 
     def do_GET(self):
-        # Route GET requests to appropriate handlers.
+        """Route GET requests to appropriate handlers."""
         if self.path == "/":
             self._serve_index()
         elif self.path == "/api/status":
@@ -44,7 +46,7 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
             self._send_error_json(404, {"error": "Not found"})
 
     def do_POST(self):
-        # Route POST requests to appropriate handlers.
+        """Route POST requests to appropriate handlers."""
         real_ip = self.get_real_ip()
         logger.info(f"POST {self.path} from {real_ip}")
 
@@ -61,7 +63,7 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------
 
     def _serve_static_css(self):
-        # Serve the CSS stylesheet.
+        """Serve the CSS stylesheet."""
         try:
             css_path = html_loader.css_path()
             with open(css_path, "r", encoding="utf-8") as f:
@@ -77,7 +79,7 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
             self._send_error_json(500, {"error": "Static file not found"})
 
     def _serve_static_favicon(self):
-        # Serve the favicon SVG file.
+        """Serve the favicon SVG file."""
         try:
             favicon_path = html_loader.favicon_path()
             with open(favicon_path, "r", encoding="utf-8") as f:
@@ -97,7 +99,7 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------
 
     def _serve_index(self):
-        # Serve the main HTML control panel with injected API secret.
+        """Serve the main HTML control panel with injected API secret."""
         logger.info("Serving main page")
         html_content = html_loader.load(config.api_secret)
 
@@ -111,7 +113,7 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------
 
     def _handle_status(self):
-        # Handle GET /api/status - Return current blocking status.
+        """Handle GET /api/status - Return current blocking status."""
         try:
             result = self._get_blocking_status()
 
@@ -129,7 +131,7 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(error_response.to_dict()).encode())
 
     def _handle_disable(self):
-        # Handle POST /api/disable - Disable Pi-hole blocking for a duration.
+        """Handle POST /api/disable - Disable Pi-hole blocking for a duration."""
         if not self._validate_secret():
             logger.warning(f"Unauthorized disable attempt from {self.client_address[0]}")
             self._send_error_json(403, {"error": "Invalid or missing secret"})
@@ -174,7 +176,7 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
             self._send_error_json(500, {"status": "error", "error": str(e)})
 
     def _handle_enable(self):
-        # Handle POST /api/enable - Re-enable Pi-hole blocking immediately.
+        """Handle POST /api/enable - Re-enable Pi-hole blocking immediately."""
         if not self._validate_secret():
             logger.warning(f"Unauthorized enable attempt from {self.client_address[0]}")
             self._send_error_json(403, {"error": "Invalid or missing secret"})
@@ -203,7 +205,7 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------
 
     def _get_blocking_status(self) -> StatusResponse:
-        # Fetch and parse the current blocking status from Pi-hole.
+        """Fetch and parse the current blocking status from Pi-hole."""
 
         def fetch_status(sid):
             status_url = f"{config.pihole_url}/api/dns/blocking?sid={sid}"
@@ -221,7 +223,19 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
         return self.session_mgr.execute_with_retry(fetch_status)
 
     def _make_pihole_request(self, url, payload=None, method="GET"):
-        # Make an HTTP request to the Pi-hole API.
+        """Make an HTTP request to the Pi-hole API.
+
+        Args:
+            url: The API URL to request.
+            payload: Optional payload dictionary.
+            method: HTTP method (GET, POST, etc.).
+
+        Returns:
+            Tuple of (response_data, status_code).
+
+        Raises:
+            HTTPError: If the API request fails.
+        """
         headers = {
             "User-Agent": config.custom_user_agent,
         }
@@ -251,25 +265,25 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------
 
     def _validate_secret(self) -> bool:
-        # Validate the backend secret using constant-time comparison.
+        """Validate the backend secret using constant-time comparison."""
         header = self.headers.get("X-Backend-Secret")
         if not header:
             return False
         return secrets.compare_digest(header, config.api_secret)
 
     def _read_json_body(self) -> dict:
-        # Read and parse a JSON request body.
+        """Read and parse a JSON request body."""
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length) if content_length > 0 else b"{}"
         return json.loads(body)
 
     def get_real_ip(self) -> str:
-        #
-        # Extract the real client IP from various proxy headers.
-        #
-        # Supports X-Forwarded-For, X-Real-IP, and RFC 7239 Forwarded headers.
-        # Falls back to the direct TCP connection IP.
-        #
+        """
+        Extract the real client IP from various proxy headers.
+
+        Supports X-Forwarded-For, X-Real-IP, and RFC 7239 Forwarded headers.
+        Falls back to the direct TCP connection IP.
+        """
         # 1. X-Forwarded-For (client, proxy1, proxy2)
         xff = self.headers.get("X-Forwarded-For")
         if xff:
@@ -295,12 +309,12 @@ class PiHoleProxyHandler(BaseHTTPRequestHandler):
         return self.client_address[0]
 
     def _send_error_json(self, status_code, error_data):
-        # Send a JSON error response.
+        """Send a JSON error response."""
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
         self.wfile.write(json.dumps(error_data).encode())
 
     def log_message(self, format, *args):
-        # Suppress default HTTP server logging to avoid duplicates with our custom logger.
+        """Suppress default HTTP server logging to avoid duplicates with our custom logger."""
         pass
